@@ -9,6 +9,5 @@ export type RootStackParamList = {
       type: TransactionType,
       description?: string
     ) => void;
-    isDark: boolean;
   };
 };

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
@@ -9,13 +9,13 @@ import {
   ScrollView,
 } from 'react-native';
 import { FilterOptions, TransactionType, TransactionCategory } from '../types/Transaction';
+import { useThemeContext } from '../contexts/ThemeContext';
 
 interface FilterModalProps {
   visible: boolean;
   onClose: () => void;
   onApplyFilters: (filters: FilterOptions) => void;
   currentFilters: FilterOptions;
-  isDark: boolean;
 }
 
 const CATEGORIES: TransactionCategory[] = [
@@ -36,16 +36,16 @@ const FilterModal: React.FC<FilterModalProps> = ({
   onClose,
   onApplyFilters,
   currentFilters,
-  isDark,
 }) => {
+  const { isDark } = useThemeContext();
   const [selectedType, setSelectedType] = useState<TransactionType | undefined>(currentFilters.type);
   const [selectedCategory, setSelectedCategory] = useState<TransactionCategory | undefined>(currentFilters.category);
   const [minAmount, setMinAmount] = useState(currentFilters.minAmount?.toString() || '');
   const [maxAmount, setMaxAmount] = useState(currentFilters.maxAmount?.toString() || '');
 
-  const styles = getStyles(isDark);
+  const styles = useMemo(() => getStyles(isDark), [isDark]);
 
-  const handleApply = () => {
+  const handleApply = useCallback(() => {
     const filters: FilterOptions = {
       type: selectedType,
       category: selectedCategory,
@@ -54,16 +54,16 @@ const FilterModal: React.FC<FilterModalProps> = ({
     };
     onApplyFilters(filters);
     onClose();
-  };
+  }, [selectedType, selectedCategory, minAmount, maxAmount, onApplyFilters, onClose]);
 
-  const handleClear = () => {
+  const handleClear = useCallback(() => {
     setSelectedType(undefined);
     setSelectedCategory(undefined);
     setMinAmount('');
     setMaxAmount('');
     onApplyFilters({});
     onClose();
-  };
+  }, [onApplyFilters, onClose]);
 
   const handleCancel = () => {
     // Reset to current filters

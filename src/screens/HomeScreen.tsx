@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import {
   View,
   StyleSheet,
@@ -13,7 +13,7 @@ import FilterModal from '../components/FilterModal';
 import Header from '../components/Header';
 import SpendingChart from '../components/SpendingChart';
 import { useTransactions } from '../hooks/useTransactions';
-import { useTheme } from '../hooks/useTheme';
+import { useThemeContext } from '../contexts/ThemeContext';
 import { FilterOptions } from '../types/Transaction';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../types/Navigation';
@@ -29,7 +29,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   const [activeFilters, setActiveFilters] = useState<FilterOptions>({});
 
   const { transactions, addTransaction, summary, loading: transactionsLoading } = useTransactions();
-  const { isDark, toggleTheme, loading: themeLoading } = useTheme();
+  const { isDark, toggleTheme, loading: themeLoading } = useThemeContext();
 
   const filteredTransactions = useMemo(() => {
     // If no filters are active, just return everything
@@ -59,9 +59,26 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
     });
   }, [transactions, activeFilters]);
 
-  const hasActiveFilters = Object.keys(activeFilters).length > 0;
+  const hasActiveFilters = useMemo(() => Object.keys(activeFilters).length > 0, [activeFilters]);
 
-  const styles = getStyles(isDark);
+  const styles = useMemo(() => getStyles(isDark), [isDark]);
+
+  const handleOpenFilter = useCallback(() => setShowFilters(true), []);
+  
+  const handleCloseFilter = useCallback(() => setShowFilters(false), []);
+  
+  const handleOpenAddTransaction = useCallback(() => navigation.navigate('AddTransaction', {
+    onAddTransaction: addTransaction,
+  }), [navigation, addTransaction]);
+
+  const headerComponent = useMemo(() => (
+    <View>
+      <BalanceSummary summary={summary} />
+      {transactions.length > 0 && (
+        <SpendingChart transactions={transactions} />
+      )}
+    </View>
+  ), [summary, transactions]);
 
   if (transactionsLoading || themeLoading) {
     return (
@@ -80,35 +97,21 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
       />
       
       <Header
-        onToggleTheme={toggleTheme}
-        onOpenFilter={() => setShowFilters(true)}
-        onOpenAddTransaction={() => navigation.navigate('AddTransaction', {
-          onAddTransaction: addTransaction,
-          isDark,
-        })}
-        isDark={isDark}
+        onOpenFilter={handleOpenFilter}
+        onOpenAddTransaction={handleOpenAddTransaction}
         hasActiveFilters={hasActiveFilters}
       />
 
       <TransactionList 
         transactions={filteredTransactions} 
-        isDark={isDark}
-        headerComponent={
-          <View>
-            <BalanceSummary summary={summary} isDark={isDark} />
-            {transactions.length > 0 && (
-              <SpendingChart transactions={transactions} isDark={isDark} />
-            )}
-          </View>
-        }
+        headerComponent={headerComponent}
       />
 
       <FilterModal
         visible={showFilters}
-        onClose={() => setShowFilters(false)}
+        onClose={handleCloseFilter}
         onApplyFilters={setActiveFilters}
         currentFilters={activeFilters}
-        isDark={isDark}
       />
     </SafeAreaView>
   );

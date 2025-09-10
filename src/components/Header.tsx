@@ -1,22 +1,20 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useThemeContext } from '../contexts/ThemeContext';
 
 interface HeaderProps {
-  onToggleTheme: () => void;
   onOpenFilter: () => void;
   onOpenAddTransaction: () => void;
-  isDark: boolean;
   hasActiveFilters: boolean;
 }
 
-const Header: React.FC<HeaderProps> = ({
-  onToggleTheme,
+const Header: React.FC<HeaderProps> = React.memo(({
   onOpenFilter,
   onOpenAddTransaction,
-  isDark,
   hasActiveFilters,
 }) => {
+  const { isDark, toggleTheme } = useThemeContext();
   const styles = getStyles(isDark);
 
   return (
@@ -42,7 +40,7 @@ const Header: React.FC<HeaderProps> = ({
 
         <TouchableOpacity 
           style={styles.iconButton} 
-          onPress={onToggleTheme}
+          onPress={toggleTheme}
           accessibilityLabel="Toggle theme"
         >
           <Ionicons 
@@ -62,7 +60,7 @@ const Header: React.FC<HeaderProps> = ({
       </View>
     </View>
   );
-};
+});
 
 const getStyles = (isDark: boolean) => StyleSheet.create({
   container: {

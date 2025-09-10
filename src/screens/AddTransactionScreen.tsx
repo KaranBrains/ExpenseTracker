@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
@@ -14,6 +14,7 @@ import { TransactionType, TransactionCategory } from '../types/Transaction';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../types/Navigation';
+import { useThemeContext } from '../contexts/ThemeContext';
 
 type AddTransactionScreenNavigationProp = StackNavigationProp<RootStackParamList, 'AddTransaction'>;
 type AddTransactionScreenRouteProp = RouteProp<RootStackParamList, 'AddTransaction'>;
@@ -40,15 +41,16 @@ const AddTransactionScreen: React.FC<AddTransactionScreenProps> = ({
   navigation,
   route,
 }) => {
-  const { onAddTransaction, isDark } = route.params;
+  const { onAddTransaction } = route.params;
+  const { isDark } = useThemeContext();
   const [amount, setAmount] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<TransactionCategory>('Food');
   const [selectedType, setSelectedType] = useState<TransactionType>('expense');
   const [description, setDescription] = useState('');
 
-  const styles = getStyles(isDark);
+  const styles = useMemo(() => getStyles(isDark), [isDark]);
 
-  const handleSubmit = () => {
+  const handleSubmit = useCallback(() => {
     const numAmount = parseFloat(amount);
     
     // Basic validation to make sure amount is valid
@@ -61,11 +63,11 @@ const AddTransactionScreen: React.FC<AddTransactionScreenProps> = ({
     
     // Navigate back to home screen
     navigation.goBack();
-  };
+  }, [amount, selectedCategory, selectedType, description, onAddTransaction, navigation]);
 
-  const handleCancel = () => {
+  const handleCancel = useCallback(() => {
     navigation.goBack();
-  };
+  }, [navigation]);
 
   return (
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>

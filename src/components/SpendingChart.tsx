@@ -2,15 +2,16 @@ import React, { useMemo } from 'react';
 import { View, Text, StyleSheet, Dimensions } from 'react-native';
 import { PieChart } from 'react-native-chart-kit';
 import { Transaction } from '../types/Transaction';
+import { useThemeContext } from '../contexts/ThemeContext';
 
 interface SpendingChartProps {
   transactions: Transaction[];
-  isDark: boolean;
 }
 
 const { width: screenWidth } = Dimensions.get('window');
 
-const SpendingChart: React.FC<SpendingChartProps> = ({ transactions, isDark }) => {
+const SpendingChart: React.FC<SpendingChartProps> = React.memo(({ transactions }) => {
+  const { isDark } = useThemeContext();
   const chartData = useMemo(() => {
     const expenses = transactions.filter(t => t.type === 'expense');
     
@@ -77,7 +78,7 @@ const SpendingChart: React.FC<SpendingChartProps> = ({ transactions, isDark }) =
       />
     </View>
   );
-};
+});
 
 const getStyles = (isDark: boolean) => StyleSheet.create({
   container: {

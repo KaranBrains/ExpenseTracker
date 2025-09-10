@@ -2,13 +2,14 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { TransactionSummary } from '../types/Transaction';
 import { formatCurrency } from '../utils/transactionUtils';
+import { useThemeContext } from '../contexts/ThemeContext';
 
 interface BalanceSummaryProps {
   summary: TransactionSummary;
-  isDark: boolean;
 }
 
-const BalanceSummary: React.FC<BalanceSummaryProps> = ({ summary, isDark }) => {
+const BalanceSummary: React.FC<BalanceSummaryProps> = React.memo(({ summary }) => {
+  const { isDark } = useThemeContext();
   const styles = getStyles(isDark);
   
   return (
@@ -40,7 +41,7 @@ const BalanceSummary: React.FC<BalanceSummaryProps> = ({ summary, isDark }) => {
       </View>
     </View>
   );
-};
+});
 
 const getStyles = (isDark: boolean) => StyleSheet.create({
   container: {

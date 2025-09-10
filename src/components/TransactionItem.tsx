@@ -2,13 +2,14 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Transaction } from '../types/Transaction';
 import { formatDate, formatCurrency } from '../utils/transactionUtils';
+import { useThemeContext } from '../contexts/ThemeContext';
 
 interface TransactionItemProps {
   transaction: Transaction;
-  isDark: boolean;
 }
 
-const TransactionItem: React.FC<TransactionItemProps> = ({ transaction, isDark }) => {
+const TransactionItem: React.FC<TransactionItemProps> = React.memo(({ transaction }) => {
+  const { isDark } = useThemeContext();
   const styles = getStyles(isDark);
   const isIncome = transaction.type === 'income';
   
@@ -48,7 +49,7 @@ const TransactionItem: React.FC<TransactionItemProps> = ({ transaction, isDark }
       </View>
     </View>
   );
-};
+});
 
 // Simple function to get emoji for each category
 const getCategoryIcon = (category: string): string => {

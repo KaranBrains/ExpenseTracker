@@ -1,27 +1,28 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { View, FlatList, Text, StyleSheet } from 'react-native';
 import { Transaction } from '../types/Transaction';
 import TransactionItem from './TransactionItem';
 import { sortTransactionsByDate } from '../utils/transactionUtils';
+import { useThemeContext } from '../contexts/ThemeContext';
 
 interface TransactionListProps {
   transactions: Transaction[];
-  isDark: boolean;
   headerComponent?: React.ReactElement;
 }
 
-const TransactionList: React.FC<TransactionListProps> = ({ transactions, isDark, headerComponent }) => {
+const TransactionList: React.FC<TransactionListProps> = ({ transactions, headerComponent }) => {
+  const { isDark } = useThemeContext();
   const sortedTransactions = useMemo(() => {
     return sortTransactionsByDate(transactions);
   }, [transactions]);
 
-  const keyExtractor = (item: Transaction) => item.id;
+  const keyExtractor = useCallback((item: Transaction) => item.id, []);
 
-  const renderItem = ({ item }: { item: Transaction }) => (
-    <TransactionItem transaction={item} isDark={isDark} />
-  );
+  const renderItem = useCallback(({ item }: { item: Transaction }) => (
+    <TransactionItem transaction={item} />
+  ), []);
 
-  const renderEmptyComponent = () => (
+  const renderEmptyComponent = useCallback(() => (
     <View style={styles.emptyContainer}>
       <Text style={styles.emptyText}>📋</Text>
       <Text style={[styles.emptyMessage, { color: isDark ? '#B0B0B0' : '#666666' }]}>
@@ -31,16 +32,16 @@ const TransactionList: React.FC<TransactionListProps> = ({ transactions, isDark,
         Add your first transaction to get started
       </Text>
     </View>
-  );
+  ), [isDark]);
 
   const styles = getStyles(isDark);
 
-  const ListHeaderComponent = () => (
+  const ListHeaderComponent = useCallback(() => (
     <View>
       {headerComponent}
       <Text style={styles.header}>Recent Transactions</Text>
     </View>
-  );
+  ), [headerComponent, styles.header]);
 
   return (
     <FlatList
