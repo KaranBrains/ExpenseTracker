@@ -9,16 +9,22 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import BalanceSummary from '../components/BalanceSummary';
 import TransactionList from '../components/TransactionList';
-import AddTransactionForm from '../components/AddTransactionForm';
 import FilterModal from '../components/FilterModal';
 import Header from '../components/Header';
 import SpendingChart from '../components/SpendingChart';
 import { useTransactions } from '../hooks/useTransactions';
 import { useTheme } from '../hooks/useTheme';
 import { FilterOptions } from '../types/Transaction';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { RootStackParamList } from '../types/Navigation';
 
-const HomeScreen: React.FC = () => {
-  const [showAddForm, setShowAddForm] = useState(false);
+type HomeScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Home'>;
+
+interface HomeScreenProps {
+  navigation: HomeScreenNavigationProp;
+}
+
+const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   const [showFilters, setShowFilters] = useState(false);
   const [activeFilters, setActiveFilters] = useState<FilterOptions>({});
 
@@ -76,7 +82,10 @@ const HomeScreen: React.FC = () => {
       <Header
         onToggleTheme={toggleTheme}
         onOpenFilter={() => setShowFilters(true)}
-        onOpenAddTransaction={() => setShowAddForm(true)}
+        onOpenAddTransaction={() => navigation.navigate('AddTransaction', {
+          onAddTransaction: addTransaction,
+          isDark,
+        })}
         isDark={isDark}
         hasActiveFilters={hasActiveFilters}
       />
@@ -92,13 +101,6 @@ const HomeScreen: React.FC = () => {
             )}
           </View>
         }
-      />
-
-      <AddTransactionForm
-        visible={showAddForm}
-        onClose={() => setShowAddForm(false)}
-        onAddTransaction={addTransaction}
-        isDark={isDark}
       />
 
       <FilterModal
